@@ -7,8 +7,8 @@ export default function SignUpPage() {
     <div className="min-h-screen bg-white flex flex-col">
       <SignUp
         routing="path"
-        path="/auth/signup"
-        signInUrl="/auth/login"
+        path="/auth/sign-up"
+        signInUrl="/auth/sign-in"
         appearance={{
           elements: {
             rootBox: 'flex justify-center items-center min-h-screen w-full',
