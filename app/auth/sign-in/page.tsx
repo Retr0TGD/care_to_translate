@@ -1,28 +1,27 @@
-'use client';
+import Image from "next/image";
+import { Loader2 } from "lucide-react";
+import { SignIn, ClerkLoaded, ClerkLoading } from "@clerk/nextjs";
 
-import { SignIn } from '@clerk/nextjs';
-
-export default function LoginPage() {
+export default function Page() {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <SignIn
-        routing="path"
-        path="/auth/sign-in"
-        signUpUrl="/auth/sign-up"
-        appearance={{
-          elements: {
-            rootBox: 'flex justify-center items-center min-h-screen w-full',
-            card: 'w-full max-w-sm shadow-none',
-            cardBox: 'w-full',
-            formButtonPrimary: 'bg-teal-600 hover:bg-teal-700 text-white rounded-full py-3 font-semibold',
-            formFieldInput: 'border-0 border-b-2 border-slate-300 rounded-none py-2 focus:border-teal-600 focus:shadow-none',
-            socialButtonsBlockButton: 'border-2 border-slate-300 rounded-xl py-3 hover:border-slate-400',
-            dividerLine: 'bg-slate-300',
-            dividerText: 'text-slate-600',
-            footerActionLink: 'text-teal-600 hover:text-teal-700 font-semibold',
-          },
-        }}
-      />
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+        <div className="h-full lg:flex flex-col items-center justify-center px-4">
+            <div className="text-center space-y-4 pt-16">
+                <h1 className="font-bold text-3xl text-[#2E2A47] ">Welcome Back</h1>
+                <p className="text-base text-[#7E8CA0]">Log In to get back to your dashboard</p>
+            </div>
+            <div className="flex items-center justify-center mt-8">
+                <ClerkLoaded>
+                    <SignIn path="/sign-in" />
+                </ClerkLoaded>
+                <ClerkLoading>
+                    <Loader2 className="animate-spin text-muted-foreground"/>
+                </ClerkLoading>
+            </div>
+        </div>
+        <div className="h-full bg-blue-600 hidden lg:flex items-center justify-center">
+            <Image src="/logo.svg" height={100} width={100} alt="Logo" />
+        </div>
     </div>
   );
 }

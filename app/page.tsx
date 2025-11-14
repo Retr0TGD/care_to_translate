@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 // import { Card } from '@/components/ui/card';
-import { Users, User } from 'lucide-react';
+import { Stethoscope, User } from 'lucide-react';
 
 export default function Home() {
   const [selectedRole, setSelectedRole] = useState<'staff' | 'care-recipient' | null>(null);
@@ -40,7 +40,7 @@ export default function Home() {
               }`}
             >
               <div className="flex flex-col items-center gap-3">
-                <Users className="w-12 h-12 text-slate-700" strokeWidth={1.5} />
+                <Stethoscope className="w-12 h-12 text-slate-700" strokeWidth={1.5} />
                 <span className="text-lg font-semibold text-slate-900">Staff</span>
               </div>
             </button>
