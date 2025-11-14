@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Search, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const LANGUAGES = [
   { name: 'Albanian', native: 'Shqip' },
@@ -59,6 +60,7 @@ const LANGUAGES = [
 ];
 
 export default function CareRecipientPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedGender, setSelectedGender] = useState<string | null>(null);
@@ -78,13 +80,22 @@ export default function CareRecipientPage() {
 
   const handleSelectGender = (gender: string) => {
     setSelectedGender(gender);
-    // TODO: Navigate to next step or handle translation flow
   };
 
   const handleCloseSidebar = () => {
     setShowGenderSidebar(false);
     setSelectedLanguage(null);
     setSelectedGender(null);
+  };
+
+  const handleContinue = () => {
+    if (selectedLanguage && selectedGender) {
+      const params = new URLSearchParams({
+        language: selectedLanguage,
+        gender: selectedGender,
+      });
+      router.push(`/care-recipient/dashboard?${params.toString()}`);
+    }
   };
 
   return (
@@ -194,9 +205,7 @@ export default function CareRecipientPage() {
               </div>
               {selectedGender && (
                 <button
-                  onClick={() => {
-                    // TODO: Navigate to translation screen with selected language and gender
-                  }}
+                  onClick={handleContinue}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-full transition-colors mt-auto"
                 >
                   Continue
