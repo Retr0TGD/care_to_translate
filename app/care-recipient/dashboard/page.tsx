@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Settings, User, Stethoscope, MessageCircle, Home, Search, Mic, ChevronDown, X, Check } from 'lucide-react';
+import { Settings, User, Stethoscope, MessageCircle, Home, Search, Mic, ChevronDown, X } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function DashboardPage() {
@@ -46,7 +46,9 @@ export default function DashboardPage() {
   };
 
   const handleRegister = () => {
-    router.push('/auth/sign-in');
+    if (selectedRole === 'staff') {
+      router.push('/auth/signup');
+    }
   };
 
   return (
@@ -223,7 +225,12 @@ export default function DashboardPage() {
               {/* Register Button */}
               <button
                 onClick={handleRegister}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-full transition-colors"
+                disabled={selectedRole === 'care-recipient'}
+                className={`w-full font-semibold py-3 rounded-full transition-colors ${
+                  selectedRole === 'care-recipient'
+                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                }`}
               >
                 Register
               </button>

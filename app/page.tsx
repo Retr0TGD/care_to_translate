@@ -12,7 +12,7 @@ export default function Home() {
 
   const handleContinue = () => {
     if (selectedRole === 'staff') {
-      router.push('/auth/login');
+      router.push('/auth/sign-in');
     } else if (selectedRole === 'care-recipient') {
       // Will navigate to the care recipient flow later
       router.push('/care-recipient');
