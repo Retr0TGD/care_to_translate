@@ -1,15 +1,20 @@
 'use client';
 
-import { useState } from 'react';
-import { Settings, User, Stethoscope, MessageCircle, Home, Search, Mic, ChevronDown, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, User, Stethoscope, Home, Search, Mic, ChevronDown, X, Check, LogOut } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useUser, useClerk } from '@clerk/nextjs';
 
 export default function DashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
   const [activeNav, setActiveNav] = useState('home');
   const [showRoleSidebar, setShowRoleSidebar] = useState(false);
-  const [selectedRole, setSelectedRole] = useState('care-recipient');
+  const [selectedRole, setSelectedRole] = useState<'staff' | 'care-recipient'>(() => {
+    return typeof window !== 'undefined' && (isLoaded ?? false) && user ? 'staff' : 'care-recipient';
+  });
   
   const language = searchParams.get('language') || 'Select Language';
   const gender = searchParams.get('gender') || 'not selected';
@@ -37,18 +42,30 @@ export default function DashboardPage() {
     router.push('/care-recipient');
   };
 
-  const handleHeadphoneClick = () => {
+  const handleUserClick = () => {
     setShowRoleSidebar(true);
   };
 
-  const handleRoleSelect = (role) => {
+  const handleRoleSelect = (role: 'staff' | 'care-recipient') => {
     setSelectedRole(role);
   };
 
   const handleRegister = () => {
     if (selectedRole === 'staff') {
-      router.push('/auth/signup');
+      router.push('/auth/sign-up');
     }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push('/');
+  };
+
+  const handleContentCardClick = (cardId: number) => {
+    if (cardId === 1) {
+      router.push('/care-recipient/ready-made-content');
+    }
+    // Add handlers for other cards later
   };
 
   return (
@@ -62,14 +79,10 @@ export default function DashboardPage() {
               <Settings size={24} className="text-foreground" />
             </button>
             <button 
-              onClick={handleHeadphoneClick}
+              onClick={handleUserClick}
               className="relative p-2 hover:bg-muted rounded-lg transition-colors"
             >
               <User size={24} className="text-foreground" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-            </button>
-            <button className="relative p-2 hover:bg-muted rounded-lg transition-colors">
-              <MessageCircle size={24} className="text-foreground" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
           </div>
@@ -89,12 +102,11 @@ export default function DashboardPage() {
       <main className="flex-1 overflow-y-auto mt-16 mb-20 px-4 py-6">
         <div className="max-w-full">
           <h1 className="text-2xl font-bold text-foreground mb-6">Discover content</h1>
-
-          {/* Content Cards */}
           <div className="space-y-4">
             {contentCards.map((card) => (
               <button
                 key={card.id}
+                onClick={() => handleContentCardClick(card.id)}
                 className={`w-full p-6 rounded-2xl text-white font-semibold text-xl transition-transform hover:scale-105 active:scale-95 ${
                   card.bgGradient.includes('emerald')
                     ? `bg-gradient-to-r ${card.bgGradient} ${card.textColor || ''}`
@@ -152,7 +164,6 @@ export default function DashboardPage() {
       {/* Role Selection Sidebar */}
       {showRoleSidebar && (
         <>
-          {/* Backdrop */}
           <div
             className="fixed inset-0 bg-black/50 z-40"
             onClick={() => setShowRoleSidebar(false)}
@@ -160,7 +171,6 @@ export default function DashboardPage() {
 
           {/* Sidebar */}
           <div className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-background z-50 shadow-lg transform transition-transform duration-300 ease-out">
-            {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-border">
               <button
                 onClick={() => setShowRoleSidebar(false)}
@@ -169,20 +179,17 @@ export default function DashboardPage() {
                 <X size={24} className="text-foreground" />
               </button>
               <h2 className="text-lg font-semibold text-foreground flex-1 text-center">Phrase library</h2>
-              <div className="w-10" /> {/* Spacer for alignment */}
+              <div className="w-10" />
             </div>
 
             {/* Content */}
             <div className="flex flex-col items-center justify-between h-full p-6">
               <div className="w-full">
                 <p className="text-center text-foreground font-semibold mb-6">I want to use this app as:</p>
-
-                {/* Role Selection Cards */}
                 <div className="flex flex-col gap-4 mb-8">
-                  {/* Staff Card */}
                   <button
                     onClick={() => handleRoleSelect('staff')}
-                    className={`p-6 rounded-2xl border-2 transition-all ${
+                    className={`p-6 rounded-2xl border-2 transition-all relative ${
                       selectedRole === 'staff'
                         ? 'border-emerald-600 bg-emerald-50'
                         : 'border-border bg-muted hover:border-emerald-400'
@@ -194,11 +201,16 @@ export default function DashboardPage() {
                         Staff
                       </span>
                     </div>
+                    {selectedRole === 'staff' && (
+                      <div className="absolute top-4 right-4 bg-emerald-600 rounded-full p-1">
+                        <Check size={16} className="text-white" />
+                      </div>
+                    )}
                   </button>
 
                   {/* Care Recipient Card */}
                   <div className="relative">
-                    <button
+                   <button
                       onClick={() => handleRoleSelect('care-recipient')}
                       className={`p-6 rounded-2xl border-2 transition-all w-full ${
                         selectedRole === 'care-recipient'
@@ -213,27 +225,44 @@ export default function DashboardPage() {
                         </span>
                       </div>
                     </button>
+                    {selectedRole === 'care-recipient' && (
+                      <div className="absolute top-4 right-4 bg-emerald-600 rounded-full p-1">
+                        <Check size={16} className="text-white" />
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Info Message */}
-                <p className="text-center text-sm text-muted-foreground mb-6">
-                  A free account is required to use the app as staff.
-                </p>
-              </div>
+                {user && selectedRole === 'staff' && (
+                    <button
+                      onClick={handleLogout}
+                      className="w-full font-semibold py-3 rounded-full transition-colors bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2"
+                    >
+                      <LogOut size={20} />
+                      Logout
+                    </button>
+                  )}
 
-              {/* Register Button */}
-              <button
-                onClick={handleRegister}
-                disabled={selectedRole === 'care-recipient'}
-                className={`w-full font-semibold py-3 rounded-full transition-colors ${
-                  selectedRole === 'care-recipient'
-                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                }`}
-              >
-                Register
-              </button>
+                  {!user && (
+                <button
+                  onClick={handleRegister}
+                  disabled={selectedRole === 'care-recipient'}
+                  className={`w-full font-semibold py-3 rounded-full transition-colors ${
+                    selectedRole === 'care-recipient'
+                      ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  }`}
+                >
+                  Register
+                </button>
+              )}
+
+                {!user && (
+                  <p className="text-center text-sm text-muted-foreground mb-6">
+                    A free account is required to use the app as staff.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </>
